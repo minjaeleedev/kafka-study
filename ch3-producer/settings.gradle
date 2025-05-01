@@ -1,0 +1,3 @@
+rootProject.name = 'ch3-producer'
+
+include 'ch3-producer'
