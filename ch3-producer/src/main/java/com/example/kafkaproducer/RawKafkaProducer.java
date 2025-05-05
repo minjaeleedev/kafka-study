@@ -2,6 +2,7 @@ package com.example.kafkaproducer;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PreDestroy;
@@ -13,9 +14,9 @@ public class RawKafkaProducer {
 
     public RawKafkaProducer() {
         Properties kafkaProps = new Properties();
-        kafkaProps.put("bootstrap.servers", "kafka:9092");
-        kafkaProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        kafkaProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+        kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 
         this.producer = new KafkaProducer<>(kafkaProps);
     }
