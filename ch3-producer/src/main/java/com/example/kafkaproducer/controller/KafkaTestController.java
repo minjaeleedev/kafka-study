@@ -3,6 +3,7 @@ package com.example.kafkaproducer.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.ResponseEntity;
 
 import com.example.kafkaproducer.producer.AsynchronousRawKafkaProducer;
 import com.example.kafkaproducer.producer.SynchronousRawKafkaProducer;
@@ -17,12 +18,14 @@ public class KafkaTestController {
     private final AsynchronousRawKafkaProducer asyncProducer;
 
     @PostMapping("/sync")
-    public void sendSync() {
-        syncProducer.send("test-topic", "sync-key", "hello sync");
+    public ResponseEntity<String> sendSync() {
+        syncProducer.send("test.topic", "sync-key", "hello sync");
+        return ResponseEntity.ok("Sync message sent");
     }
 
     @PostMapping("/async")
-    public void sendAsync() {
-        asyncProducer.send("test-topic", "async-key", "hello async");
+    public ResponseEntity<String> sendAsync() {
+        asyncProducer.send("test.topic", "async-key", "hello async");
+        return ResponseEntity.ok("Async message sent");
     }
 }

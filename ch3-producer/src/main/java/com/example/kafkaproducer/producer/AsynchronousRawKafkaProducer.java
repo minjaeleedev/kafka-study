@@ -10,7 +10,10 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import jakarta.annotation.PreDestroy;
 import java.util.Properties;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class AsynchronousRawKafkaProducer {
   private final KafkaProducer<String, String> producer;
   private class DemoProducerCallback implements Callback {
@@ -35,6 +38,7 @@ public class AsynchronousRawKafkaProducer {
       ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, message);
       try {
         // send asynchronous
+        log.info("Sending asynchronous message to topic: {}", record.toString());
         producer.send(record, new DemoProducerCallback());
       } catch(Exception e) {
         e.printStackTrace();

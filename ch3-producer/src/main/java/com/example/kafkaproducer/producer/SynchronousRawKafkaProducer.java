@@ -9,7 +9,10 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.PreDestroy;
 import java.util.Properties;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class SynchronousRawKafkaProducer {
     private final KafkaProducer<String, String> producer;
 
@@ -26,6 +29,7 @@ public class SynchronousRawKafkaProducer {
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, message);
         try {
           // send synchronous
+          log.info("Sent message to topic: {}", record.toString());
           producer.send(record).get();
         } catch(Exception e) {
           e.printStackTrace();
