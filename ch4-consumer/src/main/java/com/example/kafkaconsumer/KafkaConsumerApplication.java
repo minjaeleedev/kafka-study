@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.example.kafkaconsumer.consumer.BaseKafkaConsumer;
 
+
 @SpringBootApplication
 public class KafkaConsumerApplication {
     public static void main(String[] args) {
@@ -18,7 +19,7 @@ public class KafkaConsumerApplication {
         kafkaConsumer.subscribe(Collections.singletonList("customerCountries"));
         // subscribe by regex
         kafkaConsumer.subscribe(Pattern.compile("test.*"));
-        
+
         kafkaConsumer.poll();
     }
 }

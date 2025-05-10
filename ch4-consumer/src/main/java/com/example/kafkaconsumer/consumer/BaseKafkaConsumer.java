@@ -25,6 +25,7 @@ public class BaseKafkaConsumer {
   public BaseKafkaConsumer() {
     Properties kafkaProps = new Properties();
     kafkaProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+    kafkaProps.put(ConsumerConfig.GROUP_ID_CONFIG, "CountryCounter");
     kafkaProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     kafkaProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     this.consumer = new KafkaConsumer<>(kafkaProps);
