@@ -67,4 +67,8 @@ public class BaseKafkaConsumer implements KafkaConsumerWorker {
       }
     }
   }
+
+  public void shutdown() {
+    consumer.close();
+  }
 }

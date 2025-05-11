@@ -35,6 +35,10 @@ public class KafkaConsumerRunner {
 
     @PreDestroy
     public void shutdown() {
+        for (KafkaConsumerWorker consumer : consumers) {
+            log.info("Shutting down consumer : {}", consumer.getClass().getSimpleName());
+            consumer.shutdown(); // ✅ 종료 요청
+        }
         executorService.shutdownNow();
     }
 }

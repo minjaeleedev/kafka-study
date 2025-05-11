@@ -70,4 +70,9 @@ public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
       });
     }
   }
+
+  @Override
+  public void shutdown() {
+    consumer.close();
+  }
 }

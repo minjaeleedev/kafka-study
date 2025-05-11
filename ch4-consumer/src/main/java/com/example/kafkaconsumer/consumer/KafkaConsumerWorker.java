@@ -7,4 +7,5 @@ public interface KafkaConsumerWorker {
   void subscribe(Collection<String> topics);
   void subscribe(Pattern pattern);
   void poll();
+  void shutdown();
 }
