@@ -19,10 +19,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
+
+import java.util.concurrent.atomic.AtomicLong;
+
 @Component
 @Slf4j
 public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
   private final KafkaConsumer<String, String> consumer;
+  private final AtomicLong commitVersion = new AtomicLong(0);
 
   public AsyncCommitKafkaConsumer() {
     Properties kafkaProps = new Properties();
@@ -51,11 +55,16 @@ public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
           record.topic(), record.partition(), record.offset(), record.key(), record.value());
       }
 
+      long version = commitVersion.incrementAndGet();
       consumer.commitAsync(new OffsetCommitCallback() {
         @Override
         public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
           if (exception != null) {
-            log.error("Commit failed for offsets : {}", offsets, exception);
+            if(version == commitVersion.get()) {
+              // retryCommitAsync(offsets)
+            } else{
+              log.error("Commit failed for offsets : {}", offsets, exception);
+            }
           }
         }
       });
