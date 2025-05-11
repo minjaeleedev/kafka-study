@@ -42,7 +42,6 @@ public class BaseKafkaConsumer {
   public void poll() {
     Duration timeout = Duration.ofMillis(100);
 
-
     while (true) {
       ConsumerRecords<String, String> records = consumer.poll(timeout);
       for (ConsumerRecord<String, String> record : records) {

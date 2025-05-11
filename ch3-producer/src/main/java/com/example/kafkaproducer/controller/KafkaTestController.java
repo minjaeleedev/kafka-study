@@ -19,13 +19,13 @@ public class KafkaTestController {
 
     @PostMapping("/sync")
     public ResponseEntity<String> sendSync() {
-        syncProducer.send("test.topic", "sync-key", "hello sync");
+        syncProducer.send("customerCountries", "sync-key", "hello sync");
         return ResponseEntity.ok("Sync message sent");
     }
 
     @PostMapping("/async")
     public ResponseEntity<String> sendAsync() {
-        asyncProducer.send("test.topic", "async-key", "hello async");
+        asyncProducer.send("customerCountries", "async-key", "hello async");
         return ResponseEntity.ok("Async message sent");
     }
 }

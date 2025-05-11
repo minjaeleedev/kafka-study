@@ -4,5 +4,5 @@
 
 - docker compose up --build -d
 - docker compose down -v
-- docker logs ch3-producer
-- docker logs ch4-consumer
+- docker logs -f ch3-producer
+- docker logs -f ch4-consumer

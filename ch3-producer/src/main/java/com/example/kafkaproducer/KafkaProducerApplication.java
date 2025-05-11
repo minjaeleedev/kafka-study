@@ -11,6 +11,6 @@ public class KafkaProducerApplication {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(KafkaProducerApplication.class, args);
         RawKafkaProducer rawKafkaProducer = context.getBean(RawKafkaProducer.class);
-        rawKafkaProducer.send("CustomerCountry", "Precision Products", "France");
+        rawKafkaProducer.send("customerCountries", "Precision Products", "France");
     }
 }

@@ -1,7 +1,6 @@
 package com.example.kafkaconsumer;
 
 import java.util.Collections;
-import java.util.regex.Pattern;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +17,8 @@ public class KafkaConsumerApplication {
         // subscribe by topic
         kafkaConsumer.subscribe(Collections.singletonList("customerCountries"));
         // subscribe by regex
-        kafkaConsumer.subscribe(Pattern.compile("test.*"));
+        // 둘 중 하나만 해야 함. Subscription to topics, partitions and pattern are mutually exclusive 에러 발생
+        // kafkaConsumer.subscribe(Pattern.compile("test.*"));
 
         kafkaConsumer.poll();
     }
