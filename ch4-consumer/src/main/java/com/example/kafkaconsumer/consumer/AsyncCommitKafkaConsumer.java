@@ -2,6 +2,8 @@ package com.example.kafkaconsumer.consumer;
 
 import java.util.Collection;
 import java.util.regex.Pattern;
+import java.util.Map;
+
 import java.time.Duration;
 
 import org.springframework.stereotype.Component;
@@ -12,9 +14,11 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetCommitCallback;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.TopicPartition;
 @Component
 @Slf4j
 public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
@@ -47,7 +51,14 @@ public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
           record.topic(), record.partition(), record.offset(), record.key(), record.value());
       }
 
-      consumer.commitAsync();
+      consumer.commitAsync(new OffsetCommitCallback() {
+        @Override
+        public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
+          if (exception != null) {
+            log.error("Commit failed for offsets : {}", offsets, exception);
+          }
+        }
+      });
     }
   }
 }
