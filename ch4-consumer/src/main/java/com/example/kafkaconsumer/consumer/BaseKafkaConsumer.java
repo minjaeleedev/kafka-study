@@ -17,8 +17,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import com.example.kafkaconsumer.repository.CustomerCountryRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 @Component
+@Slf4j
 public class BaseKafkaConsumer implements KafkaConsumerWorker {
   private final KafkaConsumer<String, String> consumer;
   private final CustomerCountryRepository customerCountryRepository;
@@ -48,7 +51,7 @@ public class BaseKafkaConsumer implements KafkaConsumerWorker {
     while (true) {
       ConsumerRecords<String, String> records = consumer.poll(timeout);
       for (ConsumerRecord<String, String> record : records) {
-        System.out.printf("topic = %s, partition = %d, offset = %d, " + "customer = %s, country = %s\n",
+        log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
           record.topic(),
           record.partition(),
           record.offset(),

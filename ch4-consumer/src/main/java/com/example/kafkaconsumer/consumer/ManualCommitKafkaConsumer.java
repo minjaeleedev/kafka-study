@@ -42,19 +42,19 @@ public class ManualCommitKafkaConsumer implements KafkaConsumerWorker {
     while (true) {
       ConsumerRecords<String, String> records = consumer.poll(timeout);
       for (ConsumerRecord<String, String> record : records) {
-        System.out.printf("topic = %s, partition = %d, offset = %d, " + "customer = %s, country = %s\n",
+        log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
           record.topic(),
           record.partition(),
           record.offset(),
           record.key(),
           record.value()
         );
-        
-        try {
-          consumer.commitSync();
-        } catch (CommitFailedException e) {
-          log.error("Commit failed", e);
-        }
+      }
+      
+      try {
+        consumer.commitSync();
+      } catch (CommitFailedException e) {
+        log.error("Commit failed", e);
       }
     }
   }
