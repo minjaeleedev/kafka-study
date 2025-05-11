@@ -1,31 +1,25 @@
 package com.example.kafkaconsumer.consumer;
 
-import java.util.Collection;
 import java.util.Properties;
+import java.util.Collection;
 import java.util.regex.Pattern;
-
-import org.json.JSONObject;
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.time.Duration;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.CommitFailedException;
+import org.springframework.stereotype.Component;
 
-import com.example.kafkaconsumer.repository.CustomerCountryRepository;
-
+import lombok.extern.slf4j.Slf4j;
 
 @Component
-public class BaseKafkaConsumer implements KafkaConsumerWorker {
-  private final KafkaConsumer<String, String> consumer;
-  private final CustomerCountryRepository customerCountryRepository;
+@Slf4j
+public class ManualCommitKafkaConsumer implements KafkaConsumerWorker {
+  private final KafkaConsumer<String, String> consumer; 
 
-  @Autowired
-  public BaseKafkaConsumer(CustomerCountryRepository customerCountryRepository) {
-    this.customerCountryRepository = customerCountryRepository;
+  public ManualCommitKafkaConsumer() {
     Properties kafkaProps = new Properties();
     kafkaProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
     kafkaProps.put(ConsumerConfig.GROUP_ID_CONFIG, "CountryCounter");
@@ -33,7 +27,7 @@ public class BaseKafkaConsumer implements KafkaConsumerWorker {
     kafkaProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     this.consumer = new KafkaConsumer<>(kafkaProps);
   }
-
+  
   public void subscribe(Collection<String> topics) {
     consumer.subscribe(topics);
   }
@@ -55,12 +49,12 @@ public class BaseKafkaConsumer implements KafkaConsumerWorker {
           record.key(),
           record.value()
         );
-
-        String customer = record.key();
-        customerCountryRepository.update(customer);
-        JSONObject jsonObject = new JSONObject(this.customerCountryRepository.getCustomerCountryMap());
-
-        System.out.println(jsonObject.toString());
+        
+        try {
+          consumer.commitSync();
+        } catch (CommitFailedException e) {
+          log.error("Commit failed", e);
+        }
       }
     }
   }
