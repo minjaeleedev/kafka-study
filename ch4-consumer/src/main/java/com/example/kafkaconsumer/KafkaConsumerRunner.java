@@ -27,7 +27,8 @@ public class KafkaConsumerRunner {
     @PostConstruct
     public void startConsumers() {
         for (KafkaConsumerWorker consumer : consumers) {
-            log.info("Starting consumer : {}", consumer.getClass().getSimpleName());
+            String className = consumer.getClass().getSimpleName();
+            log.info("Starting consumer : {}", className);
             consumer.subscribe(Collections.singletonList("customerCountries"));
             executorService.submit(consumer::poll);
         }
