@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-
+import java.util.concurrent.TimeUnit;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -42,5 +42,11 @@ public class KafkaConsumerRunner {
             consumer.wakeup(); // 종료 요청
         }
         executorService.shutdown();
+        
+        try {
+            executorService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error("Error shutting down executor service", e);
+        }
     }
 }
