@@ -62,7 +62,7 @@ public class SpecificOffsetCommitKafkaConsumer implements KafkaConsumerWorker {
   }
 
   @Override
-  public void shutdown() {
+  public void wakeup() {
     consumer.close();
   }
 }

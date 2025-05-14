@@ -19,7 +19,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
-
+import org.apache.kafka.common.errors.WakeupException;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
@@ -47,32 +47,41 @@ public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
 
   public void poll() {
     Duration timeout = Duration.ofMillis(100);
+    try {
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(timeout);
+        for (ConsumerRecord<String, String> record : records) {
+          log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
+            record.topic(), record.partition(), record.offset(), record.key(), record.value());
+        }
 
-    while (true) {
-      ConsumerRecords<String, String> records = consumer.poll(timeout);
-      for (ConsumerRecord<String, String> record : records) {
-        log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
-          record.topic(), record.partition(), record.offset(), record.key(), record.value());
-      }
-
-      long version = commitVersion.incrementAndGet();
-      consumer.commitAsync(new OffsetCommitCallback() {
-        @Override
-        public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
-          if (exception != null) {
-            if(version == commitVersion.get()) {
-              // retryCommitAsync(offsets)
-            } else{
-              log.error("Commit failed for offsets : {}", offsets, exception);
+        long version = commitVersion.incrementAndGet();
+        consumer.commitAsync(new OffsetCommitCallback() {
+          @Override
+          public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
+            if (exception != null) {
+              if(version == commitVersion.get()) {
+                // retryCommitAsync(offsets)
+              } else{
+                log.error("Commit failed for offsets : {}", offsets, exception);
+              }
             }
           }
-        }
-      });
+        });
+      }
+    } catch (WakeupException e) {
+      log.info("AsyncCommitKafkaConsumer wakeup exception");
+      // ignore for shutdown
+    } finally {
+      consumer.close();
+      log.info("AsyncCommitKafkaConsumer closed");
     }
+
   }
 
   @Override
-  public void shutdown() {
-    consumer.close();
+  public void wakeup() {
+    log.info("AsyncCommitKafkaConsumer wakeup");
+    consumer.wakeup();
   }
 }

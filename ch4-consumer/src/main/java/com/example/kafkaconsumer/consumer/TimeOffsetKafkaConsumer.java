@@ -78,7 +78,7 @@ public class TimeOffsetKafkaConsumer implements KafkaConsumerWorker {
   }
 
   @Override
-  public void shutdown() {
+  public void wakeup() {
     consumer.close();
   }
 }

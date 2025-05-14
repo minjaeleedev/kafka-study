@@ -83,5 +83,5 @@ public class HandleRebalanceKafkaConsumer implements KafkaConsumerWorker {
   }
 
   @Override
-  public void shutdown() {}
+  public void wakeup() {}
 }

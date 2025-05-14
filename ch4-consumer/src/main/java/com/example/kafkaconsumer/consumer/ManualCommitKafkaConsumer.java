@@ -7,6 +7,7 @@ import java.time.Duration;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.CommitFailedException;
@@ -38,28 +39,36 @@ public class ManualCommitKafkaConsumer implements KafkaConsumerWorker {
 
   public void poll() {
     Duration timeout = Duration.ofMillis(100);
-
-    while (true) {
-      ConsumerRecords<String, String> records = consumer.poll(timeout);
-      for (ConsumerRecord<String, String> record : records) {
-        log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
-          record.topic(),
-          record.partition(),
-          record.offset(),
-          record.key(),
-          record.value()
-        );
+    try {
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(timeout);
+        for (ConsumerRecord<String, String> record : records) {
+          log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
+            record.topic(),
+            record.partition(),
+            record.offset(),
+            record.key(),
+            record.value()
+          );
+        }
+        
+        try {
+          consumer.commitSync();
+        } catch (CommitFailedException e) {
+          log.error("Commit failed", e);
+        }
       }
-      
-      try {
-        consumer.commitSync();
-      } catch (CommitFailedException e) {
-        log.error("Commit failed", e);
-      }
+    } catch (WakeupException e) {
+      log.info("ManualCommitKafkaConsumer wakeup exception");
+      // ignore for shutdown
+    } finally {
+      consumer.close();
+      log.info("ManualCommitKafkaConsumer closed");
     }
   }
 
-  public void shutdown() {
-    consumer.close();
+  public void wakeup() {
+    log.info("ManualCommitKafkaConsumer shutdown");
+    consumer.wakeup();
   }
 }

@@ -12,6 +12,7 @@ import java.time.Duration;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -47,28 +48,36 @@ public class BaseKafkaConsumer implements KafkaConsumerWorker {
 
   public void poll() {
     Duration timeout = Duration.ofMillis(100);
+    try {
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(timeout);
+        for (ConsumerRecord<String, String> record : records) {
+          log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
+            record.topic(),
+            record.partition(),
+            record.offset(),
+            record.key(),
+            record.value()
+          );
 
-    while (true) {
-      ConsumerRecords<String, String> records = consumer.poll(timeout);
-      for (ConsumerRecord<String, String> record : records) {
-        log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
-          record.topic(),
-          record.partition(),
-          record.offset(),
-          record.key(),
-          record.value()
-        );
+          String customer = record.key();
+          customerCountryRepository.update(customer);
+          JSONObject jsonObject = new JSONObject(this.customerCountryRepository.getCustomerCountryMap());
 
-        String customer = record.key();
-        customerCountryRepository.update(customer);
-        JSONObject jsonObject = new JSONObject(this.customerCountryRepository.getCustomerCountryMap());
-
-        System.out.println(jsonObject.toString());
+          log.info(jsonObject.toString());
+        }
       }
+    } catch (WakeupException e) {
+      log.info("BaseKafkaConsumer wakeup exception");
+      // ignore for shutdown
+    } finally {
+      consumer.close();
+      log.info("BaseKafkaConsumer closed");
     }
   }
 
-  public void shutdown() {
-    consumer.close();
+  public void wakeup() {
+    log.info("BaseKafkaConsumer shutdown");
+    consumer.wakeup();
   }
 }

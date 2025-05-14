@@ -58,7 +58,7 @@ public class AsyncSyncCommitKafkaConsumer implements KafkaConsumerWorker {
   }
 
   @Override
-  public void shutdown() {
+  public void wakeup() {
     closing = true;
   }
 }
