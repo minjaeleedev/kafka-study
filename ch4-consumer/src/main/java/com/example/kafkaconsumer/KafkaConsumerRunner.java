@@ -18,7 +18,7 @@ import com.example.kafkaconsumer.consumer.KafkaConsumerWorker;
 @Slf4j
 public class KafkaConsumerRunner {
     private final List<KafkaConsumerWorker> consumers;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(6);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(7);
 
     public KafkaConsumerRunner(List<KafkaConsumerWorker> consumers) {
         this.consumers = consumers;
