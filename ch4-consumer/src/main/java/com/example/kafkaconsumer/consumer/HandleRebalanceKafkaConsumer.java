@@ -83,5 +83,8 @@ public class HandleRebalanceKafkaConsumer implements KafkaConsumerWorker {
   }
 
   @Override
-  public void wakeup() {}
+  public void wakeup() {
+    log.info("HandleRebalanceKafkaConsumer wakeup");
+    consumer.wakeup();
+  }
 }

@@ -5,36 +5,40 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Component;
+
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.json.JSONObject;
+import org.springframework.stereotype.Component;
+
+import com.example.kafkaconsumer.repository.CustomerCountryRepository;
+
 @Component
 @Slf4j
 public class TimeOffsetKafkaConsumer implements KafkaConsumerWorker {
   private final KafkaConsumer<String, String> consumer;
-  private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
-  private long count = 0;
+  private final CustomerCountryRepository customerCountryRepository;
 
-  public TimeOffsetKafkaConsumer() {
+  public TimeOffsetKafkaConsumer(CustomerCountryRepository customerCountryRepository) {
     Properties kafkaProps = new Properties();
     kafkaProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
     kafkaProps.put(ConsumerConfig.GROUP_ID_CONFIG, "CountryCounter");
     kafkaProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     kafkaProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     this.consumer = new KafkaConsumer<>(kafkaProps);
+    this.customerCountryRepository = customerCountryRepository;
   }
 
   public void subscribe(Collection<String> topics) {
@@ -61,24 +65,35 @@ public class TimeOffsetKafkaConsumer implements KafkaConsumerWorker {
       }
     }
 
-    while (true) {
-      ConsumerRecords<String, String> records = consumer.poll(timeout);
-      for (ConsumerRecord<String, String> record : records) {
-        log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
-          record.topic(), record.partition(), record.offset(), record.key(), record.value());
-          
-        currentOffsets.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset()+1, "no metadata"));
+    try {
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(timeout);
+        for (ConsumerRecord<String, String> record : records) {
+          log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
+            record.topic(), record.partition(), record.offset(), record.key(), record.value());
+            
+            String customer = record.key();
+            customerCountryRepository.update(customer);
+            JSONObject jsonObject = new JSONObject(this.customerCountryRepository.getCustomerCountryMap());
 
-        if (count % 100 == 0) {
-          consumer.commitAsync(currentOffsets, null);
+            log.info(jsonObject.toString());
         }
-        count++;
+        
+        consumer.commitSync();
       }
+    } catch (WakeupException e) {
+      log.info("TimeOffsetKafkaConsumer wakeup exception");
+      // ignore for shutdown
+    } finally {
+      log.info("TimeOffsetKafkaConsumer finally");
+      consumer.close();
+      log.info("TimeOffsetKafkaConsumer closed");
     }
   }
 
   @Override
   public void wakeup() {
-    consumer.close();
+    log.info("TimeOffsetKafkaConsumer wakeup");
+    consumer.wakeup();
   }
 }

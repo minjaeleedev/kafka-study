@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.Properties;
 
+import org.springframework.cglib.core.WeakCacheKey;
 import org.springframework.stereotype.Component;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
@@ -44,25 +46,33 @@ public class SpecificOffsetCommitKafkaConsumer implements KafkaConsumerWorker {
 
   public void poll() {
     Duration timeout = Duration.ofMillis(100);
+    try{
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(timeout);
+        for (ConsumerRecord<String, String> record : records) {
+          log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
+            record.topic(), record.partition(), record.offset(), record.key(), record.value());
+            
+          currentOffsets.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset()+1, "no metadata"));
 
-    while (true) {
-      ConsumerRecords<String, String> records = consumer.poll(timeout);
-      for (ConsumerRecord<String, String> record : records) {
-        log.info("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
-          record.topic(), record.partition(), record.offset(), record.key(), record.value());
-
-        currentOffsets.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset()+1, "no metadata"));
-
-        if (count % 100 == 0) {
-          consumer.commitAsync(currentOffsets, null);
+          if (count % 100 == 0) {
+            consumer.commitAsync(currentOffsets, null);
+          }
+          count++;
         }
-        count++;
       }
+    } catch(WakeupException e) {
+      log.info("SpecificOffsetCommitKafkaConsumer wakeup exception");
+      // ignore for shutdown
+    } finally {
+      consumer.close();
+      log.info("SpecificOffsetCommitKafkaConsumer closed");
     }
   }
 
   @Override
   public void wakeup() {
-    consumer.close();
+    log.info("SpecificOffsetCommitKafkaConsumer wakeup");
+    consumer.wakeup();
   }
 }
