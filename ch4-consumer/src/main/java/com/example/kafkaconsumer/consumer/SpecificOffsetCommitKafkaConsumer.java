@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.Properties;
 
-import org.springframework.cglib.core.WeakCacheKey;
 import org.springframework.stereotype.Component;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
