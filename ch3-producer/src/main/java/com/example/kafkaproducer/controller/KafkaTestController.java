@@ -28,4 +28,10 @@ public class KafkaTestController {
         asyncProducer.send("customerCountries", "async-key", "hello async");
         return ResponseEntity.ok("Async message sent");
     }
+
+    @PostMapping("/topic/standalone")
+    public ResponseEntity<String> sendStandalone() {
+        syncProducer.send("standalone", "standalone-key", "hello standalone");
+        return ResponseEntity.ok("Standalone message sent");
+    }
 }
