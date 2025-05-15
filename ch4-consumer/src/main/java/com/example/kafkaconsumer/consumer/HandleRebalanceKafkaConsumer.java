@@ -78,7 +78,7 @@ public class HandleRebalanceKafkaConsumer implements KafkaConsumerWorker {
       log.error("Unexpected error", e);
     } finally {
       consumer.close();
-      log.info("Closed consumer and we are done");
+      log.info("closed HandleRebalanceKafkaConsumer and we are done");
     }
   }
 
