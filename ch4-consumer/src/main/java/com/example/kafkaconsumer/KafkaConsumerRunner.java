@@ -13,16 +13,18 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 
 import com.example.kafkaconsumer.consumer.KafkaConsumerWorker;
-
+import com.example.kafkaconsumer.consumer.StandaloneKafkaConsumer;
 @Component
 @Slf4j
 public class KafkaConsumerRunner {
     private final List<KafkaConsumerWorker> consumers;
+    private final StandaloneKafkaConsumer standaloneConsumer;
     private final ExecutorService executorService;
 
-    public KafkaConsumerRunner(List<KafkaConsumerWorker> consumers) {
+    public KafkaConsumerRunner(List<KafkaConsumerWorker> consumers, StandaloneKafkaConsumer standaloneConsumer) {
         this.consumers = consumers;
-        this.executorService = Executors.newFixedThreadPool(consumers.size());
+        this.standaloneConsumer = standaloneConsumer;
+        this.executorService = Executors.newFixedThreadPool(consumers.size() + 1);
     }
 
     @PostConstruct
@@ -33,6 +35,8 @@ public class KafkaConsumerRunner {
             consumer.subscribe(Collections.singletonList(consumer.getTopic()));
             executorService.submit(consumer::poll);
         }
+
+        executorService.submit(standaloneConsumer::poll);
     }
 
     @PreDestroy

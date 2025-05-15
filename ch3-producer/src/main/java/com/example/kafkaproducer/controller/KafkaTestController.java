@@ -3,6 +3,7 @@ package com.example.kafkaproducer.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 
 import com.example.kafkaproducer.producer.AsynchronousRawKafkaProducer;
@@ -39,8 +40,8 @@ public class KafkaTestController {
     }
 
     @PostMapping("/topic/standalone")
-    public ResponseEntity<String> sendStandalone() {
-        syncProducer.send("standalone", "standalone-key", "hello standalone");
+    public ResponseEntity<String> sendStandalone(@RequestBody KafkaMessageDto messageDto) {
+        syncProducer.send("standalone", messageDto.getKey(), messageDto.getMessage());
         return ResponseEntity.ok("Standalone message sent");
     }
 }
