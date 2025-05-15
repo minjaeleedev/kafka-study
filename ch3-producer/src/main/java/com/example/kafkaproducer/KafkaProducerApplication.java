@@ -11,6 +11,7 @@ public class KafkaProducerApplication {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(KafkaProducerApplication.class, args);
         RawKafkaProducer rawKafkaProducer = context.getBean(RawKafkaProducer.class);
+        // if auto.create.topics.enable is true, the topic will be created automatically
         rawKafkaProducer.send("customerCountries", "Precision Products", "France");
     }
 }
