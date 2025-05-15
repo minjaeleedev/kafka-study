@@ -30,7 +30,7 @@ public class KafkaConsumerRunner {
         for (KafkaConsumerWorker consumer : consumers) {
             String className = consumer.getClass().getSimpleName();
             log.info("Starting consumer : {}", className);
-            consumer.subscribe(Collections.singletonList("customerCountries"));
+            consumer.subscribe(Collections.singletonList(consumer.getTopic()));
             executorService.submit(consumer::poll);
         }
     }
