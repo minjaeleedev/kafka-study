@@ -66,4 +66,8 @@ public class MainThreadKafkaConsumer {
   public void wakeup() {
     consumer.wakeup();
   }
+
+  public String getTopic() {
+    return "customerCountries";
+  }
 }

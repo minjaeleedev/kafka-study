@@ -87,4 +87,9 @@ public class HandleRebalanceKafkaConsumer implements KafkaConsumerWorker {
     log.info("HandleRebalanceKafkaConsumer wakeup");
     consumer.wakeup();
   }
+  
+  @Override
+  public String getTopic() {
+    return "customerCountries";
+  }
 }

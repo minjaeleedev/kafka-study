@@ -74,4 +74,8 @@ public class SpecificOffsetCommitKafkaConsumer implements KafkaConsumerWorker {
     log.info("SpecificOffsetCommitKafkaConsumer wakeup");
     consumer.wakeup();
   }
+  
+  public String getTopic() {
+    return "customerCountries";
+  }
 }

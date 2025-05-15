@@ -8,4 +8,5 @@ public interface KafkaConsumerWorker {
   void subscribe(Pattern pattern);
   void poll();
   void wakeup();
+  String getTopic();
 }

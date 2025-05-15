@@ -61,4 +61,9 @@ public class AsyncSyncCommitKafkaConsumer implements KafkaConsumerWorker {
   public void wakeup() {
     closing = true;
   }
+  
+  @Override
+  public String getTopic() {
+    return "customerCountries";
+  }
 }

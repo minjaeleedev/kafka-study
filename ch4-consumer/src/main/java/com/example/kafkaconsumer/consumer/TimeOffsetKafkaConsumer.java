@@ -96,4 +96,8 @@ public class TimeOffsetKafkaConsumer implements KafkaConsumerWorker {
     log.info("TimeOffsetKafkaConsumer wakeup");
     consumer.wakeup();
   }
+  
+  public String getTopic() {
+    return "customerCountries";
+  }
 }

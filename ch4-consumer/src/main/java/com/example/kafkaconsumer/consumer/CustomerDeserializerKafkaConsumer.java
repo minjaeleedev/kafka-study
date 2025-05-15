@@ -24,10 +24,11 @@ public class CustomerDeserializerKafkaConsumer implements KafkaConsumerWorker {
 
   public CustomerDeserializerKafkaConsumer() {
     Properties props = new Properties();
-    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); 
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092"); 
     props.put(ConsumerConfig.GROUP_ID_CONFIG, "customer-group");  
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CustomerDeserializer.class.getName());
+    props.put(ConsumerConfig.CLIENT_ID_CONFIG, "CustomerDeserializerKafkaConsumer");
     this.consumer = new KafkaConsumer<>(props);
   }
 
@@ -57,6 +58,8 @@ public class CustomerDeserializerKafkaConsumer implements KafkaConsumerWorker {
       }
     } catch (WakeupException e) {
       log.info("Wakeup from consumer");
+    } catch (Exception e) {
+      log.error("customer deserializer consumer error", e);
     } finally {
       consumer.close();
       log.info("closed CustomerDeserializerKafkaConsumer and we are done");
@@ -66,5 +69,10 @@ public class CustomerDeserializerKafkaConsumer implements KafkaConsumerWorker {
   @Override
   public void wakeup() {
     consumer.wakeup();
+  }
+
+  @Override
+  public String getTopic() {
+    return "customerSerializer";
   }
 }

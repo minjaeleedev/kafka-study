@@ -71,4 +71,8 @@ public class ManualCommitKafkaConsumer implements KafkaConsumerWorker {
     log.info("ManualCommitKafkaConsumer shutdown");
     consumer.wakeup();
   }
+  
+  public String getTopic() {
+    return "customerCountries";
+  }
 }

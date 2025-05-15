@@ -34,6 +34,7 @@ public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
     kafkaProps.put(ConsumerConfig.GROUP_ID_CONFIG, "CountryCounter");
     kafkaProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     kafkaProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+    kafkaProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "AsyncCommitKafkaConsumer");
     this.consumer = new KafkaConsumer<>(kafkaProps);
   }
 
@@ -83,5 +84,10 @@ public class AsyncCommitKafkaConsumer implements KafkaConsumerWorker {
   public void wakeup() {
     log.info("AsyncCommitKafkaConsumer wakeup");
     consumer.wakeup();
+  }
+
+  @Override
+  public String getTopic() {
+    return "customerCountries";
   }
 }

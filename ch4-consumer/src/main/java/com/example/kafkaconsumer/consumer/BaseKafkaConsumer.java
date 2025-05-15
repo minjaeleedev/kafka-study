@@ -80,4 +80,9 @@ public class BaseKafkaConsumer implements KafkaConsumerWorker {
     log.info("BaseKafkaConsumer shutdown");
     consumer.wakeup();
   }
+  
+  @Override
+  public String getTopic() {
+    return "customerCountries";
+  }
 }
